@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"io"
 	"reflect"
 	"strings"
 	"testing"
@@ -177,5 +178,12 @@ func TestTrain(t *testing.T) {
 		if !reflect.DeepEqual(m, tc.out) && tc.ok {
 			t.Errorf("Train(%s, %d) = %+v, want %+v", tc.in.r, tc.in.order, m, tc.out)
 		}
+	}
+
+	// Test case with nil reader. Cannot be captured in above test loop.
+	m := new(MarkovChain)
+	var r io.Reader
+	if err := m.Train(r, 2); err == nil {
+		t.Errorf("Train(nil reader, 2) = %+v, want err", m)
 	}
 }

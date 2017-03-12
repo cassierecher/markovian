@@ -2,6 +2,7 @@ package impl
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 )
@@ -17,6 +18,9 @@ type lesson struct {
 
 func (m *MarkovChain) Train(r io.Reader, order int) error {
 	// Validate input.
+	if r == nil {
+		return errors.New("got r = nil, want non-nil")
+	}
 	if order <= 0 {
 		return fmt.Errorf("order must be positive (got %d)", order)
 	}
