@@ -7,7 +7,6 @@ Markovian is still under development.
 ## TODO
 - Unit tests
 - Generation
-- Remove test file
 - Improve safety in order specification
 - Add usage instructions to README
 - Error check on negative ordering
