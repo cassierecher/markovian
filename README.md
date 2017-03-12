@@ -9,3 +9,4 @@ Markovian is still under development.
 - Improve safety in order specification
 - Add usage instructions to README
 - Notice punctuation and sentence endings
+- Add flag explanation to help message.

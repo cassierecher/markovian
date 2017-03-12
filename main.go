@@ -17,6 +17,19 @@ func init() {
 	flag.Parse()
 }
 
+// Implements the "help" command.
+func helpCmd() {
+	fmt.Println(`Markovian
+
+Synopsis: markovian ARG
+
+Args:
+- help:		Display this message.
+- train:	Train a Markov chain. Relevant flags: inFilePath, order.
+`)
+}
+
+// Implements the "train" command.
 func trainCmd() {
 	// Get the data to read.
 	var r io.Reader
@@ -44,11 +57,27 @@ func trainCmd() {
 
 func main() {
 	// Handle args.
-	if len(flag.Args()) > 1 {
-		fmt.Printf("Too many arguments.")
+	args := flag.Args()
+	// Validate number of args.
+	if len(args) < 1 {
+		fmt.Println("Not enough args.")
+		helpCmd()
+		os.Exit(1)
+	}
+	if len(args) > 1 {
+		fmt.Println("Too many args.")
+		helpCmd()
 		os.Exit(1)
 	}
 
-	trainCmd()
-
+	switch args[0] {
+	case "train":
+		trainCmd()
+	case "help":
+		helpCmd()
+	default:
+		fmt.Printf("Unrecognized command %q.\n")
+		helpCmd()
+		os.Exit(1)
+	}
 }
