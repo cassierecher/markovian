@@ -19,14 +19,17 @@ func init() {
 
 // Implements the "help" command.
 func helpCmd() {
-	fmt.Println(`Markovian
+	fmt.Fprintf(os.Stderr, `Markovian
 
 Synopsis: markovian ARG
 
 Args:
 - help:		Display this message.
 - train:	Train a Markov chain. Relevant flags: inFilePath, order.
+
+Flags:
 `)
+	flag.PrintDefaults()
 }
 
 // Implements the "train" command.
@@ -36,7 +39,7 @@ func trainCmd() {
 
 	switch *inFilePath {
 	case "":
-		fmt.Println("Must provide input file path.")
+		fmt.Fprintf(os.Stderr, "Must provide input file path.\n")
 		os.Exit(1)
 	case "stdin":
 		r = os.Stdin
@@ -60,12 +63,12 @@ func main() {
 	args := flag.Args()
 	// Validate number of args.
 	if len(args) < 1 {
-		fmt.Println("Not enough args.")
+		fmt.Fprintf(os.Stderr, "Not enough args.\n")
 		helpCmd()
 		os.Exit(1)
 	}
 	if len(args) > 1 {
-		fmt.Println("Too many args.")
+		fmt.Fprintf(os.Stderr, "Too many args.\n")
 		helpCmd()
 		os.Exit(1)
 	}
