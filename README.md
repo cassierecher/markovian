@@ -6,6 +6,5 @@ Markovian is still under development.
 
 ## TODO
 - Generation
-- Improve safety in order specification
 - Add usage instructions to README
 - Notice punctuation and sentence endings

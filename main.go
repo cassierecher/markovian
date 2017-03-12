@@ -53,8 +53,12 @@ func trainCmd() {
 		r = in
 	}
 
-	mc := impl.New()
-	mc.Train(r, *order)
+	mc, err := impl.New(*order)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+	mc.Train(r)
 	fmt.Printf("%+v\n", mc)
 }
 

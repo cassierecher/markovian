@@ -7,6 +7,55 @@ import (
 	"testing"
 )
 
+func TestNew(t *testing.T) {
+	tests := []struct {
+		in  int
+		out *MarkovChain
+		ok  bool
+	}{
+		{
+			in: 2,
+			out: &MarkovChain{
+				order: 2,
+			},
+			ok: true,
+		},
+		{
+			in: 47,
+			out: &MarkovChain{
+				order: 47,
+			},
+			ok: true,
+		},
+		{
+			in: 1,
+			out: &MarkovChain{
+				order: 1,
+			},
+			ok: true,
+		},
+		{}, // The all-zero case is the test for order = 0.
+		{
+			in: -1,
+		},
+	}
+
+	for _, tc := range tests {
+		out, err := New(tc.in)
+		if err == nil && !tc.ok {
+			t.Errorf("New(%d) = %+v, want err", tc.in, out)
+			continue
+		}
+		if err != nil && tc.ok {
+			t.Errorf("New(%d) = %s, want %+v", tc.in, err, tc.out)
+			continue
+		}
+		if !reflect.DeepEqual(out, tc.out) && tc.ok {
+			t.Errorf("New(d) = %+v, want %+v", tc.in, out, tc.out)
+		}
+	}
+}
+
 func TestTrain(t *testing.T) {
 	type input struct {
 		r     string // For convenience of pretty test outputs.
@@ -22,8 +71,10 @@ func TestTrain(t *testing.T) {
 			in: input{
 				order: 2,
 			},
-			out: &MarkovChain{},
-			ok:  true,
+			out: &MarkovChain{
+				order: 2,
+			},
+			ok: true,
 		},
 		// Simple order = 1 case.
 		{
@@ -32,6 +83,7 @@ func TestTrain(t *testing.T) {
 				order: 1,
 			},
 			out: &MarkovChain{
+				order: 1,
 				lessons: []lesson{
 					lesson{
 						back: []string{""},
@@ -76,6 +128,7 @@ func TestTrain(t *testing.T) {
 				order: 2,
 			},
 			out: &MarkovChain{
+				order: 2,
 				lessons: []lesson{
 					lesson{
 						back: []string{"", ""},
@@ -116,6 +169,7 @@ func TestTrain(t *testing.T) {
 				order: 3,
 			},
 			out: &MarkovChain{
+				order: 3,
 				lessons: []lesson{
 					{
 						back: []string{"", "", ""},
@@ -145,45 +199,43 @@ func TestTrain(t *testing.T) {
 			},
 			ok: true,
 		},
-		// Expect failure when order = 0.
-		{
-			in: input{
-				r: "It looks like a black peacoat.",
-			},
-		},
-		// Expect failure when order is negative.
-		{
-			in: input{
-				r:     "I wonder who put it there.",
-				order: -1,
-			},
-		},
 	}
 
 	for _, tc := range tests {
 		// Set up.
-		m := New()
+		m, err := New(tc.in.order)
+		if err != nil {
+			t.Errorf("New(%d) got err, want nil (New is not SUT)", tc.in.order)
+			continue
+		}
+
 		r := strings.NewReader(tc.in.r)
 
-		err := m.Train(r, tc.in.order)
+		err = m.Train(r)
 
 		if err == nil && !tc.ok {
-			t.Errorf("Train(%s, %d) = %+v, want err", tc.in.r, tc.in.order, m)
+			t.Errorf("New(%d).Train(%s) = %+v, want err", tc.in.order, tc.in.r, m)
 			continue
 		}
 		if err != nil && tc.ok {
-			t.Errorf("Train(%s, %d) = %s, want %+v", tc.in.r, tc.in.order, err, tc.out)
+			t.Errorf("New(%d).Train(%s) = %s, want %+v", tc.in.order, tc.in.r, err, tc.out)
 			continue
 		}
 		if !reflect.DeepEqual(m, tc.out) && tc.ok {
-			t.Errorf("Train(%s, %d) = %+v, want %+v", tc.in.r, tc.in.order, m, tc.out)
+			t.Errorf("New(%d).Train(%s) = %+v, want %+v", tc.in.order, tc.in.r, m, tc.out)
 		}
 	}
 
 	// Test case with nil reader. Cannot be captured in above test loop.
-	m := New()
+	order := 2
+	m, err := New(order)
+	if err != nil {
+		t.Errorf("New(%d) got err, want nil (New is not SUT)", 2)
+		return
+	}
+
 	var r io.Reader
-	if err := m.Train(r, 2); err == nil {
-		t.Errorf("Train(nil reader, 2) = %+v, want err", m)
+	if err := m.Train(r); err == nil {
+		t.Errorf("New(%d).Train(nil reader) = %+v, want err", order, m)
 	}
 }

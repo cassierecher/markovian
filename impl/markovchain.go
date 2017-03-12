@@ -9,8 +9,10 @@ import (
 )
 
 // MarkovChain encapsulates a Markov chain.
+// Never create a MarkovChain directly - always use the provided New function.
 type MarkovChain struct {
 	lessons []lesson
+	order   int
 }
 
 // lesson internally represents a single iteration of training - a set of words, and the word to follow.
@@ -19,28 +21,31 @@ type lesson struct {
 	next string
 }
 
-// New returns a fully-initialized MarkovChain.
-func New() *MarkovChain {
-	return new(MarkovChain)
+// New returns a fully-initialized MarkovChain of the given order, or the first error to block initialization.
+// Order must be a positive value.
+func New(order int) (*MarkovChain, error) {
+	if order <= 0 {
+		return nil, fmt.Errorf("order must be positive (got %d)", order)
+	}
+	m := MarkovChain{
+		order: order,
+	}
+	return &m, nil
 }
 
-// Train takes a reader, and an order, and trains the Markov chain to the given order with the data in the reader.
-// Order must be a positive value.
+// Train takes a reader and trains the Markov chain with the data in the reader.
 // It returns an error, should one occur.
-func (m *MarkovChain) Train(r io.Reader, order int) error {
+func (m *MarkovChain) Train(r io.Reader) error {
 	// Validate input.
 	if r == nil {
 		return errors.New("got r = nil, want non-nil")
-	}
-	if order <= 0 {
-		return fmt.Errorf("order must be positive (got %d)", order)
 	}
 
 	// Construct a word scanner.
 	wordScnr := bufio.NewScanner(r)
 	wordScnr.Split(bufio.ScanWords)
 
-	back := make([]string, order, order)
+	back := make([]string, m.order, m.order)
 
 	// Scan until the scanner won't scan anymore.
 	for wordScnr.Scan() {
