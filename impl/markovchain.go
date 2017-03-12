@@ -16,6 +16,11 @@ type lesson struct {
 }
 
 func (m *MarkovChain) Train(r io.Reader, order int) error {
+	// Validate input.
+	if order <= 0 {
+		return fmt.Errorf("order must be positive (got %d)", order)
+	}
+
 	// Construct a word scanner.
 	wordScnr := bufio.NewScanner(r)
 	wordScnr.Split(bufio.ScanWords)

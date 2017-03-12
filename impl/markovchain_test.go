@@ -144,6 +144,19 @@ func TestTrain(t *testing.T) {
 			},
 			ok: true,
 		},
+		// Expect failure when order = 0.
+		{
+			in: input{
+				r: "It looks like a black peacoat.",
+			},
+		},
+		// Expect failure when order is negative.
+		{
+			in: input{
+				r:     "I wonder who put it there.",
+				order: -1,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -161,7 +174,7 @@ func TestTrain(t *testing.T) {
 			t.Errorf("Train(%s, %d) = %s, want %+v", tc.in.r, tc.in.order, err, tc.out)
 			continue
 		}
-		if !reflect.DeepEqual(m, tc.out) {
+		if !reflect.DeepEqual(m, tc.out) && tc.ok {
 			t.Errorf("Train(%s, %d) = %+v, want %+v", tc.in.r, tc.in.order, m, tc.out)
 		}
 	}
