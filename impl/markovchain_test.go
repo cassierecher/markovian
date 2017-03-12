@@ -16,6 +16,14 @@ func TestTrain(t *testing.T) {
 		out *MarkovChain
 		ok  bool
 	}{
+		// Test vacuous case of no input data.
+		{
+			in: input{
+				order: 2,
+			},
+			out: &MarkovChain{},
+			ok:  true,
+		},
 		// Simple order = 1 case.
 		{
 			in: input{
