@@ -43,7 +43,7 @@ func main() {
 		r = in
 	}
 
-	mc := new(impl.MarkovChain)
+	mc := impl.New()
 	mc.Train(r, *order)
 	fmt.Printf("%+v\n", mc)
 }

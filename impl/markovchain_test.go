@@ -162,7 +162,7 @@ func TestTrain(t *testing.T) {
 
 	for _, tc := range tests {
 		// Set up.
-		m := new(MarkovChain)
+		m := New()
 		r := strings.NewReader(tc.in.r)
 
 		err := m.Train(r, tc.in.order)
@@ -181,7 +181,7 @@ func TestTrain(t *testing.T) {
 	}
 
 	// Test case with nil reader. Cannot be captured in above test loop.
-	m := new(MarkovChain)
+	m := New()
 	var r io.Reader
 	if err := m.Train(r, 2); err == nil {
 		t.Errorf("Train(nil reader, 2) = %+v, want err", m)

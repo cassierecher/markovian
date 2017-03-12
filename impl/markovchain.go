@@ -19,6 +19,11 @@ type lesson struct {
 	next string
 }
 
+// New returns a fully-initialized MarkovChain.
+func New() *MarkovChain {
+	return new(MarkovChain)
+}
+
 // Train takes a reader, and an order, and trains the Markov chain to the given order with the data in the reader.
 // Order must be a positive value.
 // It returns an error, should one occur.
