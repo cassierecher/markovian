@@ -7,12 +7,12 @@ import (
 )
 
 type MarkovChain struct {
-	lessons []Lesson
+	lessons []lesson
 }
 
-type Lesson struct {
-	Back []string
-	Next string
+type lesson struct {
+	back []string
+	next string
 }
 
 func (m *MarkovChain) Train(r io.Reader, order int) error {
@@ -26,9 +26,9 @@ func (m *MarkovChain) Train(r io.Reader, order int) error {
 		curr := string(wordScnr.Bytes())
 
 		// Save the information in a lesson.
-		m.lessons = append(m.lessons, Lesson{
-			Back: back,
-			Next: curr,
+		m.lessons = append(m.lessons, lesson{
+			back: back,
+			next: curr,
 		})
 
 		// Update state for the next iteration.
