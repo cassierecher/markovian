@@ -17,13 +17,7 @@ func init() {
 	flag.Parse()
 }
 
-func main() {
-	// Handle args.
-	if len(flag.Args()) > 1 {
-		fmt.Printf("Too many arguments.")
-		os.Exit(1)
-	}
-
+func trainCmd() {
 	// Get the data to read.
 	var r io.Reader
 
@@ -46,4 +40,15 @@ func main() {
 	mc := impl.New()
 	mc.Train(r, *order)
 	fmt.Printf("%+v\n", mc)
+}
+
+func main() {
+	// Handle args.
+	if len(flag.Args()) > 1 {
+		fmt.Printf("Too many arguments.")
+		os.Exit(1)
+	}
+
+	trainCmd()
+
 }
