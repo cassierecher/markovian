@@ -11,14 +11,14 @@ import (
 // MarkovChain encapsulates a Markov chain.
 // Never create a MarkovChain directly - always use the provided New function.
 type MarkovChain struct {
-	lessons []lesson
-	order   int
+	Lessons []lesson
+	Order   int
 }
 
 // lesson internally represents a single iteration of training - a set of words, and the word to follow.
 type lesson struct {
-	back []string
-	next string
+	Back []string
+	Next string
 }
 
 // New returns a fully-initialized MarkovChain of the given order, or the first error to block initialization.
@@ -28,7 +28,7 @@ func New(order int) (*MarkovChain, error) {
 		return nil, fmt.Errorf("order must be positive (got %d)", order)
 	}
 	m := MarkovChain{
-		order: order,
+		Order: order,
 	}
 	return &m, nil
 }
@@ -45,7 +45,7 @@ func (m *MarkovChain) Train(r io.Reader) error {
 	wordScnr := bufio.NewScanner(r)
 	wordScnr.Split(bufio.ScanWords)
 
-	back := make([]string, m.order, m.order)
+	back := make([]string, m.Order, m.Order)
 
 	// Scan until the scanner won't scan anymore.
 	for wordScnr.Scan() {
@@ -53,9 +53,9 @@ func (m *MarkovChain) Train(r io.Reader) error {
 		curr := string(wordScnr.Bytes())
 
 		// Save the information in a lesson.
-		m.lessons = append(m.lessons, lesson{
-			back: back,
-			next: curr,
+		m.Lessons = append(m.Lessons, lesson{
+			Back: back,
+			Next: curr,
 		})
 
 		// Update state for the next iteration.

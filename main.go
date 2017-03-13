@@ -2,6 +2,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -10,8 +11,11 @@ import (
 	"github.com/cassierecher/markovian/impl"
 )
 
-var inFilePath = flag.String("in", "", `A file to train the Markov chain on. Alternatively, specify "stdin" to use standard input.`)
-var order = flag.Int("order", 2, `The order of the Markov chain.`)
+var (
+	inFilePath  = flag.String("in", "", `A file to train the Markov chain on. Alternatively, specify "stdin" to use standard input.`)
+	outFilePath = flag.String("out", "markov.json", "A file to store the Markov chain in. File will be overwritten if it already exists.")
+	order       = flag.Int("order", 2, `The order of the Markov chain.`)
+)
 
 func init() {
 	flag.Parse()
@@ -25,7 +29,7 @@ Synopsis: markovian ARG
 
 Args:
 - help:		Display this message.
-- train:	Train a Markov chain. Relevant flags: inFilePath, order.
+- train:	Train a Markov chain. Relevant flags: inFilePath, outFilePath, order.
 
 Flags:
 `)
@@ -46,7 +50,7 @@ func trainCmd() {
 	default:
 		in, err := os.Open(*inFilePath)
 		if err != nil {
-			fmt.Printf("error: %s", err)
+			fmt.Fprintf(os.Stderr, "%s\n", err)
 			os.Exit(1)
 		}
 		defer in.Close()
@@ -59,7 +63,20 @@ func trainCmd() {
 		os.Exit(1)
 	}
 	mc.Train(r)
-	fmt.Printf("%+v\n", mc)
+
+	// Marshal the resulting Markov chain to JSON in a file.
+	out, err := os.Create(*outFilePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+	defer out.Close()
+
+	e := json.NewEncoder(out)
+	if err := e.Encode(mc); err != nil {
+		fmt.Fprintf(os.Stderr, "Error encoding to JSON: %s\n", err)
+		os.Exit(1)
+	}
 }
 
 func main() {
