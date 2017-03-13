@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	inFilePath   = flag.String("in", "", "A file containing a Markov chain to use. Leave empty to start with a new Markov chain.")
 	dataFilePath = flag.String("data", "", `A file of data to train the Markov chain on. Alternatively, specify "stdin" to use standard input.`)
 	outFilePath  = flag.String("out", "markov.json", "A file to store the Markov chain in. File will be overwritten if it already exists.")
 	order        = flag.Int("order", 2, `The order of the Markov chain.`)
@@ -31,7 +32,7 @@ Synopsis: markovian ARG
 
 Args:
 - help:		Display this message.
-- train:	Train a Markov chain. Relevant flags: data, out, order.
+- train:	Train a Markov chain. Relevant flags: in, data, out, order.
 
 Flags:
 `)
@@ -42,9 +43,23 @@ Flags:
 // Returns errors, if one should occur.
 func trainCmd() error {
 	// Get the input Markov chain.
-	mc, err := impl.New(*order)
-	if err != nil {
-		return fmt.Errorf("couldn't get input Markov chain: %s", err)
+	// Must use address of zero value instead of nil pointer due to JSON parsing requirement.
+	mc := &impl.MarkovChain{}
+	if *inFilePath == "" {
+		var err error
+		mc, err = impl.New(*order)
+		if err != nil {
+			return fmt.Errorf("couldn't get new Markov chain: %s", err)
+		}
+	} else {
+		// Get data from file.
+		b, err := ioutil.ReadFile(*inFilePath)
+		if err != nil {
+			return fmt.Errorf("couldn't read input file: %s", err)
+		}
+		if err := json.Unmarshal(b, mc); err != nil {
+			return fmt.Errorf("couldn't read json: %s", err)
+		}
 	}
 
 	// Get the data to read.
@@ -55,6 +70,7 @@ func trainCmd() error {
 	case "stdin":
 		r = os.Stdin
 	default:
+		// Input is possibly very large; use a reader instead of ioutil convenience method.
 		in, err := os.Open(*dataFilePath)
 		if err != nil {
 			return fmt.Errorf("couldn't open file: %s", err)

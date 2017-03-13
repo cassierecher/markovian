@@ -8,3 +8,4 @@ Markovian is still under development.
 - Generation
 - Add usage instructions to README
 - Notice punctuation and sentence endings
+- Unit tests for multiple training
