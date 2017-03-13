@@ -3,18 +3,20 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/cassierecher/markovian/impl"
 )
 
 var (
-	inFilePath  = flag.String("in", "", `A file to train the Markov chain on. Alternatively, specify "stdin" to use standard input.`)
-	outFilePath = flag.String("out", "markov.json", "A file to store the Markov chain in. File will be overwritten if it already exists.")
-	order       = flag.Int("order", 2, `The order of the Markov chain.`)
+	dataFilePath = flag.String("data", "", `A file of data to train the Markov chain on. Alternatively, specify "stdin" to use standard input.`)
+	outFilePath  = flag.String("out", "markov.json", "A file to store the Markov chain in. File will be overwritten if it already exists.")
+	order        = flag.Int("order", 2, `The order of the Markov chain.`)
 )
 
 func init() {
@@ -29,7 +31,7 @@ Synopsis: markovian ARG
 
 Args:
 - help:		Display this message.
-- train:	Train a Markov chain. Relevant flags: inFilePath, outFilePath, order.
+- train:	Train a Markov chain. Relevant flags: data, out, order.
 
 Flags:
 `)
@@ -37,46 +39,40 @@ Flags:
 }
 
 // Implements the "train" command.
-func trainCmd() {
+// Returns errors, if one should occur.
+func trainCmd() error {
+	// Get the input Markov chain.
+	mc, err := impl.New(*order)
+	if err != nil {
+		return fmt.Errorf("couldn't get input Markov chain: %s", err)
+	}
+
 	// Get the data to read.
 	var r io.Reader
-
-	switch *inFilePath {
+	switch *dataFilePath {
 	case "":
-		fmt.Fprintf(os.Stderr, "Must provide input file path.\n")
-		os.Exit(1)
+		return errors.New("must provide input file path")
 	case "stdin":
 		r = os.Stdin
 	default:
-		in, err := os.Open(*inFilePath)
+		in, err := os.Open(*dataFilePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
-			os.Exit(1)
+			return fmt.Errorf("couldn't open file: %s", err)
 		}
 		defer in.Close()
 		r = in
 	}
 
-	mc, err := impl.New(*order)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	}
+	// Perform training.
 	mc.Train(r)
 
 	// Marshal the resulting Markov chain to JSON in a file.
-	out, err := os.Create(*outFilePath)
+	b, err := json.Marshal(mc)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+		return err
 	}
-	defer out.Close()
 
-	e := json.NewEncoder(out)
-	if err := e.Encode(mc); err != nil {
-		fmt.Fprintf(os.Stderr, "Error encoding to JSON: %s\n", err)
-		os.Exit(1)
-	}
+	return ioutil.WriteFile(*outFilePath, b, 0600)
 }
 
 func main() {
@@ -96,11 +92,14 @@ func main() {
 
 	switch args[0] {
 	case "train":
-		trainCmd()
+		if err := trainCmd(); err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
 	case "help":
 		helpCmd()
 	default:
-		fmt.Printf("Unrecognized command %q.\n")
+		fmt.Fprintf(os.Stderr, "Unrecognized command %q.\n", args[0])
 		helpCmd()
 		os.Exit(1)
 	}
