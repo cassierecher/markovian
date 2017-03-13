@@ -16,21 +16,21 @@ func TestNew(t *testing.T) {
 		{
 			in: 2,
 			out: &MarkovChain{
-				order: 2,
+				Order: 2,
 			},
 			ok: true,
 		},
 		{
 			in: 47,
 			out: &MarkovChain{
-				order: 47,
+				Order: 47,
 			},
 			ok: true,
 		},
 		{
 			in: 1,
 			out: &MarkovChain{
-				order: 1,
+				Order: 1,
 			},
 			ok: true,
 		},
@@ -72,7 +72,7 @@ func TestTrain(t *testing.T) {
 				order: 2,
 			},
 			out: &MarkovChain{
-				order: 2,
+				Order: 2,
 			},
 			ok: true,
 		},
@@ -83,39 +83,39 @@ func TestTrain(t *testing.T) {
 				order: 1,
 			},
 			out: &MarkovChain{
-				order: 1,
-				lessons: []lesson{
+				Order: 1,
+				Lessons: []lesson{
 					lesson{
-						back: []string{""},
-						next: "I",
+						Back: []string{""},
+						Next: "I",
 					},
 					lesson{
-						back: []string{"I"},
-						next: "see",
+						Back: []string{"I"},
+						Next: "see",
 					},
 					lesson{
-						back: []string{"see"},
-						next: "a",
+						Back: []string{"see"},
+						Next: "a",
 					},
 					lesson{
-						back: []string{"a"},
-						next: "tree",
+						Back: []string{"a"},
+						Next: "tree",
 					},
 					lesson{
-						back: []string{"tree"},
-						next: "built",
+						Back: []string{"tree"},
+						Next: "built",
 					},
 					lesson{
-						back: []string{"built"},
-						next: "into",
+						Back: []string{"built"},
+						Next: "into",
 					},
 					lesson{
-						back: []string{"into"},
-						next: "the",
+						Back: []string{"into"},
+						Next: "the",
 					},
 					lesson{
-						back: []string{"the"},
-						next: "sidewalk.",
+						Back: []string{"the"},
+						Next: "sidewalk.",
 					},
 				},
 			},
@@ -128,35 +128,35 @@ func TestTrain(t *testing.T) {
 				order: 2,
 			},
 			out: &MarkovChain{
-				order: 2,
-				lessons: []lesson{
+				Order: 2,
+				Lessons: []lesson{
 					lesson{
-						back: []string{"", ""},
-						next: "The",
+						Back: []string{"", ""},
+						Next: "The",
 					},
 					lesson{
-						back: []string{"", "The"},
-						next: "tree",
+						Back: []string{"", "The"},
+						Next: "tree",
 					},
 					lesson{
-						back: []string{"The", "tree"},
-						next: "has",
+						Back: []string{"The", "tree"},
+						Next: "has",
 					},
 					lesson{
-						back: []string{"tree", "has"},
-						next: "two",
+						Back: []string{"tree", "has"},
+						Next: "two",
 					},
 					lesson{
-						back: []string{"has", "two"},
-						next: "posts",
+						Back: []string{"has", "two"},
+						Next: "posts",
 					},
 					lesson{
-						back: []string{"two", "posts"},
-						next: "supporting",
+						Back: []string{"two", "posts"},
+						Next: "supporting",
 					},
 					lesson{
-						back: []string{"posts", "supporting"},
-						next: "it.",
+						Back: []string{"posts", "supporting"},
+						Next: "it.",
 					},
 				},
 			},
@@ -169,31 +169,31 @@ func TestTrain(t *testing.T) {
 				order: 3,
 			},
 			out: &MarkovChain{
-				order: 3,
-				lessons: []lesson{
+				Order: 3,
+				Lessons: []lesson{
 					{
-						back: []string{"", "", ""},
-						next: "There's",
+						Back: []string{"", "", ""},
+						Next: "There's",
 					},
 					{
-						back: []string{"", "", "There's"},
-						next: "a",
+						Back: []string{"", "", "There's"},
+						Next: "a",
 					},
 					{
-						back: []string{"", "There's", "a"},
-						next: "coat",
+						Back: []string{"", "There's", "a"},
+						Next: "coat",
 					},
 					{
-						back: []string{"There's", "a", "coat"},
-						next: "on",
+						Back: []string{"There's", "a", "coat"},
+						Next: "on",
 					},
 					{
-						back: []string{"a", "coat", "on"},
-						next: "one",
+						Back: []string{"a", "coat", "on"},
+						Next: "one",
 					},
 					{
-						back: []string{"coat", "on", "one"},
-						next: "post.",
+						Back: []string{"coat", "on", "one"},
+						Next: "post.",
 					},
 				},
 			},
