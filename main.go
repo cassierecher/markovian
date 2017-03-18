@@ -39,27 +39,37 @@ Flags:
 	flag.PrintDefaults()
 }
 
-// Implements the "train" command.
-// Returns errors, if one should occur.
-func trainCmd() error {
-	// Get the input Markov chain.
+// Gets the Markov chain to focus on, either from the specified file, or new if none was specified.
+// Returns the Markov chain, or an error if one should occur.
+func obtainMarkovChain() (*impl.MarkovChain, error) {
 	// Must use address of zero value instead of nil pointer due to JSON parsing requirement.
 	mc := &impl.MarkovChain{}
 	if *inFilePath == "" {
 		var err error
 		mc, err = impl.New(*order)
 		if err != nil {
-			return fmt.Errorf("couldn't get new Markov chain: %s", err)
+			return nil, fmt.Errorf("couldn't make new Markov chain: %s", err)
 		}
 	} else {
 		// Get data from file.
 		b, err := ioutil.ReadFile(*inFilePath)
 		if err != nil {
-			return fmt.Errorf("couldn't read input file: %s", err)
+			return nil, fmt.Errorf("couldn't read input file: %s", err)
 		}
 		if err := json.Unmarshal(b, mc); err != nil {
-			return fmt.Errorf("couldn't read json: %s", err)
+			return nil, fmt.Errorf("couldn't read json: %s", err)
 		}
+	}
+	return mc, nil
+}
+
+// Implements the "train" command.
+// Returns errors, if one should occur.
+func trainCmd() error {
+	// Get the input Markov chain.
+	mc, err := obtainMarkovChain()
+	if err != nil {
+		return fmt.Errorf("couldn't obtain Markov chain: %s", err)
 	}
 
 	// Get the data to read.
