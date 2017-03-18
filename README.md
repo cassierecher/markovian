@@ -7,4 +7,4 @@ Markovian is still under development.
 ## TODO
 - Generation
 - Add usage instructions to README
-- Notice punctuation and sentence endings
+- Make sure sentence nonterminal punctuation is treated nicely

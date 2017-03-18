@@ -52,7 +52,18 @@ func (m *MarkovChain) Train(r io.Reader) error {
 		// Interpret the scan value as a string.
 		curr := string(wordScnr.Bytes())
 
-		words := []string{curr}
+		var words []string
+
+		// Check if the last rune is a sentence terminator, and that it's not just a sentence terminator.
+		currRunes := []rune(curr)
+		last := currRunes[len(currRunes)-1]
+		if len(currRunes) != 1 && (last == '?' || last == '!' || last == '.') { // TODO: handle Unicode sentence terminators more generally
+			// Add the word and sentence terminal rune separately.
+			currWithoutLast := currRunes[:len(currRunes)-1]
+			words = append(words, string(currWithoutLast), string(last))
+		} else {
+			words = append(words, curr)
+		}
 
 		for _, v := range words {
 			// Save the information in a lesson.

@@ -115,7 +115,11 @@ func TestTrain_New(t *testing.T) {
 					},
 					lesson{
 						Back: []string{"the"},
-						Next: "sidewalk.",
+						Next: "sidewalk",
+					},
+					lesson{
+						Back: []string{"sidewalk"},
+						Next: ".",
 					},
 				},
 			},
@@ -124,7 +128,7 @@ func TestTrain_New(t *testing.T) {
 		// Simple order = 2 case.
 		{
 			in: input{
-				r:     "The tree has two posts supporting it.",
+				r:     "The tree has two posts supporting it!",
 				order: 2,
 			},
 			out: &MarkovChain{
@@ -156,7 +160,11 @@ func TestTrain_New(t *testing.T) {
 					},
 					lesson{
 						Back: []string{"posts", "supporting"},
-						Next: "it.",
+						Next: "it",
+					},
+					lesson{
+						Back: []string{"supporting", "it"},
+						Next: "!",
 					},
 				},
 			},
@@ -165,7 +173,7 @@ func TestTrain_New(t *testing.T) {
 		// Simple order = 3 case.
 		{
 			in: input{
-				r:     "There's a coat on one post.",
+				r:     "There's a coat on one post?",
 				order: 3,
 			},
 			out: &MarkovChain{
@@ -193,7 +201,39 @@ func TestTrain_New(t *testing.T) {
 					},
 					{
 						Back: []string{"coat", "on", "one"},
-						Next: "post.",
+						Next: "post",
+					},
+					{
+						Back: []string{"on", "one", "post"},
+						Next: "?",
+					},
+				},
+			},
+			ok: true,
+		},
+		{
+			in: input{
+				r:     "floating punctuation . works",
+				order: 1,
+			},
+			out: &MarkovChain{
+				Order: 1,
+				Lessons: []lesson{
+					{
+						Back: []string{""},
+						Next: "floating",
+					},
+					{
+						Back: []string{"floating"},
+						Next: "punctuation",
+					},
+					{
+						Back: []string{"punctuation"},
+						Next: ".",
+					},
+					{
+						Back: []string{"."},
+						Next: "works",
 					},
 				},
 			},
