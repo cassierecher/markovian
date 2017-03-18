@@ -101,6 +101,25 @@ func trainCmd() error {
 	return ioutil.WriteFile(*outFilePath, b, 0600)
 }
 
+// Implements the "generate" command.
+// Returns errors, if one should occur.
+func generateCmd() error {
+	// Get the input Markov chain.
+	mc, err := obtainMarkovChain()
+	if err != nil {
+		return fmt.Errorf("couldn't obtain Markov chain: %s", err)
+	}
+
+	// Generate doesn't work with an untrained Markov chain.
+	if len(mc.Lessons) < 1 {
+		return errors.New(`command "generate" requires trained input Markov chain`)
+	}
+
+	fmt.Printf("Not yet implemented\n")
+
+	return nil
+}
+
 func main() {
 	// Handle args.
 	args := flag.Args()
@@ -119,6 +138,11 @@ func main() {
 	switch args[0] {
 	case "train":
 		if err := trainCmd(); err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
+	case "generate":
+		if err := generateCmd(); err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 			os.Exit(1)
 		}
