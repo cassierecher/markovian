@@ -56,7 +56,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestTrain(t *testing.T) {
+func TestTrain_New(t *testing.T) {
 	type input struct {
 		r     string // For convenience of pretty test outputs.
 		order int
@@ -209,9 +209,7 @@ func TestTrain(t *testing.T) {
 			continue
 		}
 
-		r := strings.NewReader(tc.in.r)
-
-		err = m.Train(r)
+		err = m.Train(strings.NewReader(tc.in.r))
 
 		if err == nil && !tc.ok {
 			t.Errorf("New(%d).Train(%s) = %+v, want err", tc.in.order, tc.in.r, m)
@@ -237,5 +235,157 @@ func TestTrain(t *testing.T) {
 	var r io.Reader
 	if err := m.Train(r); err == nil {
 		t.Errorf("New(%d).Train(nil reader) = %+v, want err", order, m)
+	}
+}
+
+func TestTrain_Existing(t *testing.T) {
+	type input struct {
+		r string // For convenience of pretty test outputs.
+		m *MarkovChain
+	}
+	tests := []struct {
+		in  input
+		out *MarkovChain
+	}{
+		// Test case of training a premade but empty chain.
+		{
+			in: input{
+				r: "The dog",
+				m: &MarkovChain{
+					Order:   2,
+					Lessons: []lesson{},
+				},
+			},
+			out: &MarkovChain{
+				Order: 2,
+				Lessons: []lesson{
+					lesson{
+						Back: []string{"", ""},
+						Next: "The",
+					},
+					lesson{
+						Back: []string{"", "The"},
+						Next: "dog",
+					},
+				},
+			},
+		},
+		// Test case of no input data to premade Markov chain.
+		{
+			in: input{
+				m: &MarkovChain{
+					Order: 2,
+					Lessons: []lesson{
+						lesson{
+							Back: []string{"red", "orange"},
+							Next: "yellow",
+						},
+					},
+				},
+			},
+			out: &MarkovChain{
+				Order: 2,
+				Lessons: []lesson{
+					lesson{
+						Back: []string{"red", "orange"},
+						Next: "yellow",
+					},
+				},
+			},
+		},
+		// Test case of training a premade Markov chain.
+		{
+			in: input{
+				m: &MarkovChain{
+					Order: 1,
+					Lessons: []lesson{
+						lesson{
+							Back: []string{"green"},
+							Next: "blue",
+						},
+						lesson{
+							Back: []string{"blue"},
+							Next: "indigo",
+						},
+						lesson{
+							Back: []string{"indigo"},
+							Next: "violet",
+						},
+					},
+				},
+				r: "translucent clear iridescent",
+			},
+			out: &MarkovChain{
+				Order: 1,
+				Lessons: []lesson{
+					lesson{
+						Back: []string{"green"},
+						Next: "blue",
+					},
+					lesson{
+						Back: []string{"blue"},
+						Next: "indigo",
+					},
+					lesson{
+						Back: []string{"indigo"},
+						Next: "violet",
+					},
+					lesson{
+						Back: []string{""},
+						Next: "translucent",
+					},
+					lesson{
+						Back: []string{"translucent"},
+						Next: "clear",
+					},
+					lesson{
+						Back: []string{"clear"},
+						Next: "iridescent",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		// Copy.
+		m := &MarkovChain{
+			Order: tc.in.m.Order,
+		}
+		// Copy demands the lengths sync up.
+		m.Lessons = make([]lesson, len(tc.in.m.Lessons))
+		copy(m.Lessons, tc.in.m.Lessons)
+
+		err := m.Train(strings.NewReader(tc.in.r))
+
+		if err != nil {
+			t.Errorf("%+v.Train(%s) = %s, want %+v", tc.in.m, tc.in.r, err, tc.out)
+			continue
+		}
+		if !reflect.DeepEqual(m, tc.out) {
+			t.Errorf("%+v.Train(%s) = %+v, want %+v", tc.in.m, tc.in.r, m, tc.out)
+		}
+	}
+
+	// Test case with nil reader. Cannot be captured in above test loop.
+	m := &MarkovChain{
+		Order: 2,
+		Lessons: []lesson{
+			lesson{
+				Back: []string{"one", "two"},
+				Next: "three",
+			},
+		},
+	}
+	m2 := &MarkovChain{
+		Order: m.Order,
+	}
+	// Copy demands the lengths sync up.
+	m2.Lessons = make([]lesson, len(m.Lessons))
+	copy(m2.Lessons, m.Lessons)
+
+	var r io.Reader
+	if err := m2.Train(r); err == nil {
+		t.Errorf("%+v.Train(nil reader) = %+v, want err", m, m2)
 	}
 }
