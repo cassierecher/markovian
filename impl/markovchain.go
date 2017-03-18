@@ -52,14 +52,18 @@ func (m *MarkovChain) Train(r io.Reader) error {
 		// Interpret the scan value as a string.
 		curr := string(wordScnr.Bytes())
 
-		// Save the information in a lesson.
-		m.Lessons = append(m.Lessons, lesson{
-			Back: back,
-			Next: curr,
-		})
+		words := []string{curr}
 
-		// Update state for the next iteration.
-		back = append(back[1:], curr)
+		for _, v := range words {
+			// Save the information in a lesson.
+			m.Lessons = append(m.Lessons, lesson{
+				Back: back,
+				Next: v,
+			})
+
+			// Update state for the next iteration.
+			back = append(back[1:], v)
+		}
 	}
 	// EOF is not recognized as an error here, so we can just check for the presence of any error.
 	if err := wordScnr.Err(); err != nil {
