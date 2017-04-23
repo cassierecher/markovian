@@ -19,15 +19,8 @@ func newFrequencyGroup() map[string]int {
 // MarkovChain encapsulates a Markov chain.
 // Never create a MarkovChain directly - always use the provided New function.
 type MarkovChain struct {
-	Lessons   []lesson
 	Order     int
 	Knowledge map[string]frequencyGroup
-}
-
-// lesson internally represents a single iteration of training - a set of words, and the word to follow.
-type lesson struct {
-	Back []string
-	Next string
 }
 
 // New returns a fully-initialized MarkovChain of the given order, or the first error to block initialization.
@@ -76,11 +69,8 @@ func (m *MarkovChain) Train(r io.Reader) error {
 		}
 
 		for _, v := range words {
-			// Save the information in a lesson.
-			m.Lessons = append(m.Lessons, lesson{
-				Back: back,
-				Next: v,
-			})
+			// Save the information.
+			m.addKnowledge(back, v)
 
 			// Update state for the next iteration.
 			back = append(back[1:], v)

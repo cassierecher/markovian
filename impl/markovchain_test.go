@@ -84,48 +84,36 @@ func TestTrain_New(t *testing.T) {
 		// Simple order = 1 case.
 		{
 			in: input{
-				r:     "I see a tree built into the sidewalk.",
+				r:     "I see the tree built into the sidewalk.",
 				order: 1,
 			},
 			out: &MarkovChain{
-				Order:     1,
-				Knowledge: map[string]frequencyGroup{},
-				Lessons: []lesson{
-					lesson{
-						Back: []string{""},
-						Next: "I",
+				Order: 1,
+				Knowledge: map[string]frequencyGroup{
+					"": frequencyGroup{
+						"I": 1,
 					},
-					lesson{
-						Back: []string{"I"},
-						Next: "see",
+					"I": frequencyGroup{
+						"see": 1,
 					},
-					lesson{
-						Back: []string{"see"},
-						Next: "a",
+					"see": frequencyGroup{
+						"the": 1,
 					},
-					lesson{
-						Back: []string{"a"},
-						Next: "tree",
+					"the": frequencyGroup{
+						"tree":     1,
+						"sidewalk": 1,
 					},
-					lesson{
-						Back: []string{"tree"},
-						Next: "built",
+					"tree": frequencyGroup{
+						"built": 1,
 					},
-					lesson{
-						Back: []string{"built"},
-						Next: "into",
+					"built": frequencyGroup{
+						"into": 1,
 					},
-					lesson{
-						Back: []string{"into"},
-						Next: "the",
+					"into": frequencyGroup{
+						"the": 1,
 					},
-					lesson{
-						Back: []string{"the"},
-						Next: "sidewalk",
-					},
-					lesson{
-						Back: []string{"sidewalk"},
-						Next: ".",
+					"sidewalk": frequencyGroup{
+						".": 1,
 					},
 				},
 			},
@@ -134,44 +122,39 @@ func TestTrain_New(t *testing.T) {
 		// Simple order = 2 case.
 		{
 			in: input{
-				r:     "The tree has two posts supporting it!",
+				r:     "The tree has two posts has two posts supporting it!",
 				order: 2,
 			},
 			out: &MarkovChain{
-				Order:     2,
-				Knowledge: map[string]frequencyGroup{},
-				Lessons: []lesson{
-					lesson{
-						Back: []string{"", ""},
-						Next: "The",
+				Order: 2,
+				Knowledge: map[string]frequencyGroup{
+					"$": frequencyGroup{
+						"The": 1,
 					},
-					lesson{
-						Back: []string{"", "The"},
-						Next: "tree",
+					"$The": frequencyGroup{
+						"tree": 1,
 					},
-					lesson{
-						Back: []string{"The", "tree"},
-						Next: "has",
+					"The$tree": frequencyGroup{
+						"has": 1,
 					},
-					lesson{
-						Back: []string{"tree", "has"},
-						Next: "two",
+					"tree$has": frequencyGroup{
+						"two": 1,
 					},
-					lesson{
-						Back: []string{"has", "two"},
-						Next: "posts",
+					"has$two": frequencyGroup{
+						"posts": 2,
 					},
-					lesson{
-						Back: []string{"two", "posts"},
-						Next: "supporting",
+					"two$posts": frequencyGroup{
+						"has":        1,
+						"supporting": 1,
 					},
-					lesson{
-						Back: []string{"posts", "supporting"},
-						Next: "it",
+					"posts$has": frequencyGroup{
+						"two": 1,
 					},
-					lesson{
-						Back: []string{"supporting", "it"},
-						Next: "!",
+					"posts$supporting": frequencyGroup{
+						"it": 1,
+					},
+					"supporting$it": frequencyGroup{
+						"!": 1,
 					},
 				},
 			},
@@ -184,36 +167,28 @@ func TestTrain_New(t *testing.T) {
 				order: 3,
 			},
 			out: &MarkovChain{
-				Order:     3,
-				Knowledge: map[string]frequencyGroup{},
-				Lessons: []lesson{
-					{
-						Back: []string{"", "", ""},
-						Next: "There's",
+				Order: 3,
+				Knowledge: map[string]frequencyGroup{
+					"$$": frequencyGroup{
+						"There's": 1,
 					},
-					{
-						Back: []string{"", "", "There's"},
-						Next: "a",
+					"$$There's": frequencyGroup{
+						"a": 1,
 					},
-					{
-						Back: []string{"", "There's", "a"},
-						Next: "coat",
+					"$There's$a": frequencyGroup{
+						"coat": 1,
 					},
-					{
-						Back: []string{"There's", "a", "coat"},
-						Next: "on",
+					"There's$a$coat": frequencyGroup{
+						"on": 1,
 					},
-					{
-						Back: []string{"a", "coat", "on"},
-						Next: "one",
+					"a$coat$on": frequencyGroup{
+						"one": 1,
 					},
-					{
-						Back: []string{"coat", "on", "one"},
-						Next: "post",
+					"coat$on$one": frequencyGroup{
+						"post": 1,
 					},
-					{
-						Back: []string{"on", "one", "post"},
-						Next: "?",
+					"on$one$post": frequencyGroup{
+						"?": 1,
 					},
 				},
 			},
@@ -225,24 +200,19 @@ func TestTrain_New(t *testing.T) {
 				order: 1,
 			},
 			out: &MarkovChain{
-				Order:     1,
-				Knowledge: map[string]frequencyGroup{},
-				Lessons: []lesson{
-					{
-						Back: []string{""},
-						Next: "floating",
+				Order: 1,
+				Knowledge: map[string]frequencyGroup{
+					"": frequencyGroup{
+						"floating": 1,
 					},
-					{
-						Back: []string{"floating"},
-						Next: "punctuation",
+					"floating": frequencyGroup{
+						"punctuation": 1,
 					},
-					{
-						Back: []string{"punctuation"},
-						Next: ".",
+					"punctuation": frequencyGroup{
+						".": 1,
 					},
-					{
-						Back: []string{"."},
-						Next: "works",
+					".": frequencyGroup{
+						"works": 1,
 					},
 				},
 			},
@@ -303,20 +273,16 @@ func TestTrain_Existing(t *testing.T) {
 				m: &MarkovChain{
 					Order:     2,
 					Knowledge: map[string]frequencyGroup{},
-					Lessons:   []lesson{},
 				},
 			},
 			out: &MarkovChain{
-				Order:     2,
-				Knowledge: map[string]frequencyGroup{},
-				Lessons: []lesson{
-					lesson{
-						Back: []string{"", ""},
-						Next: "The",
+				Order: 2,
+				Knowledge: map[string]frequencyGroup{
+					"$": frequencyGroup{
+						"The": 1,
 					},
-					lesson{
-						Back: []string{"", "The"},
-						Next: "dog",
+					"$The": frequencyGroup{
+						"dog": 1,
 					},
 				},
 			},
@@ -327,23 +293,11 @@ func TestTrain_Existing(t *testing.T) {
 				m: &MarkovChain{
 					Order:     2,
 					Knowledge: map[string]frequencyGroup{},
-					Lessons: []lesson{
-						lesson{
-							Back: []string{"red", "orange"},
-							Next: "yellow",
-						},
-					},
 				},
 			},
 			out: &MarkovChain{
 				Order:     2,
 				Knowledge: map[string]frequencyGroup{},
-				Lessons: []lesson{
-					lesson{
-						Back: []string{"red", "orange"},
-						Next: "yellow",
-					},
-				},
 			},
 		},
 		// Test case of training a premade Markov chain.
@@ -352,50 +306,20 @@ func TestTrain_Existing(t *testing.T) {
 				m: &MarkovChain{
 					Order:     1,
 					Knowledge: map[string]frequencyGroup{},
-					Lessons: []lesson{
-						lesson{
-							Back: []string{"green"},
-							Next: "blue",
-						},
-						lesson{
-							Back: []string{"blue"},
-							Next: "indigo",
-						},
-						lesson{
-							Back: []string{"indigo"},
-							Next: "violet",
-						},
-					},
 				},
 				r: "translucent clear iridescent",
 			},
 			out: &MarkovChain{
-				Order:     1,
-				Knowledge: map[string]frequencyGroup{},
-				Lessons: []lesson{
-					lesson{
-						Back: []string{"green"},
-						Next: "blue",
+				Order: 1,
+				Knowledge: map[string]frequencyGroup{
+					"": frequencyGroup{
+						"translucent": 1,
 					},
-					lesson{
-						Back: []string{"blue"},
-						Next: "indigo",
+					"translucent": frequencyGroup{
+						"clear": 1,
 					},
-					lesson{
-						Back: []string{"indigo"},
-						Next: "violet",
-					},
-					lesson{
-						Back: []string{""},
-						Next: "translucent",
-					},
-					lesson{
-						Back: []string{"translucent"},
-						Next: "clear",
-					},
-					lesson{
-						Back: []string{"clear"},
-						Next: "iridescent",
+					"clear": frequencyGroup{
+						"iridescent": 1,
 					},
 				},
 			},
@@ -403,23 +327,18 @@ func TestTrain_Existing(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		// Copy.
-		m := &MarkovChain{
-			Order:     tc.in.m.Order,
-			Knowledge: map[string]frequencyGroup{},
-		}
-		// Copy demands the lengths sync up.
-		m.Lessons = make([]lesson, len(tc.in.m.Lessons))
-		copy(m.Lessons, tc.in.m.Lessons)
+		in := tc.in
 
-		err := m.Train(strings.NewReader(tc.in.r))
+		// Save state for possibly printing later.
+		mBeforeStr := fmt.Sprintf("%+v", in.m)
 
+		err := in.m.Train(strings.NewReader(in.r))
 		if err != nil {
-			t.Errorf("%+v.Train(%s) = %s, want %+v", tc.in.m, tc.in.r, err, tc.out)
+			t.Errorf("(%s).Train(%s) = %s, want %+v", mBeforeStr, in.r, err, tc.out)
 			continue
 		}
-		if !reflect.DeepEqual(m, tc.out) {
-			t.Errorf("%+v.Train(%s) = %+v, want %+v", tc.in.m, tc.in.r, m, tc.out)
+		if !reflect.DeepEqual(in.m, tc.out) {
+			t.Errorf("(%s).Train(%s) = %+v, want %+v", mBeforeStr, in.r, in.m, tc.out)
 		}
 	}
 
@@ -427,24 +346,14 @@ func TestTrain_Existing(t *testing.T) {
 	m := &MarkovChain{
 		Order:     2,
 		Knowledge: map[string]frequencyGroup{},
-		Lessons: []lesson{
-			lesson{
-				Back: []string{"one", "two"},
-				Next: "three",
-			},
-		},
 	}
-	m2 := &MarkovChain{
-		Order:     m.Order,
-		Knowledge: map[string]frequencyGroup{},
-	}
-	// Copy demands the lengths sync up.
-	m2.Lessons = make([]lesson, len(m.Lessons))
-	copy(m2.Lessons, m.Lessons)
+
+	// Save state for possibly printing later.
+	mBeforeStr := fmt.Sprintf("%+v", m)
 
 	var r io.Reader
-	if err := m2.Train(r); err == nil {
-		t.Errorf("%+v.Train(nil reader) = %+v, want err", m, m2)
+	if err := m.Train(r); err == nil {
+		t.Errorf("%+v.Train(nil reader) = %+v, want err", mBeforeStr, m)
 	}
 }
 
