@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"unicode"
 )
 
@@ -83,4 +84,15 @@ func (m *MarkovChain) Train(r io.Reader) error {
 	}
 
 	return nil
+}
+
+// buildKey builds a map key from the given string slice.
+// It joins the strings with $s as a separator, and escapes all pre-existing $s for safety.
+// The map key is a string.
+func buildKey(in []string) string {
+	for i := range in {
+		in[i] = strings.Replace(in[i], `\`, `\\`, -1)
+		in[i] = strings.Replace(in[i], `$`, `\$`, -1)
+	}
+	return strings.Join(in, "$")
 }

@@ -429,3 +429,64 @@ func TestTrain_Existing(t *testing.T) {
 		t.Errorf("%+v.Train(nil reader) = %+v, want err", m, m2)
 	}
 }
+
+func TestBuildKey(t *testing.T) {
+	tests := []struct {
+		in  []string
+		out string
+	}{
+		// Empty case.
+		{},
+		// One simple string.
+		{
+			in:  []string{"antiquing"},
+			out: "antiquing",
+		},
+		// Multiple simple strings.
+		{
+			in: []string{
+				"backyard",
+				"maple",
+				"tree",
+			},
+			out: "backyard$maple$tree",
+		},
+		// Add delimiters.
+		{
+			in:  []string{"ca$h"},
+			out: `ca\$h`,
+		},
+		{
+			in: []string{
+				"sea$hells",
+				"$eem",
+				"super",
+			},
+			out: `sea\$hells$\$eem$super`,
+		},
+		// Add escapes.
+		{
+			in:  []string{`back\slash`},
+			out: `back\\slash`,
+		},
+		{
+			in:  []string{`\\\`},
+			out: `\\\\\\`,
+		},
+		// Delimiters and escapes.
+		{
+			in: []string{
+				`$$\$\\`,
+				`fan\ta$tic`,
+				`stuff`,
+			},
+			out: `\$\$\\\$\\\\$fan\\ta\$tic$stuff`,
+		},
+	}
+	for _, tc := range tests {
+		out := buildKey(tc.in)
+		if out != tc.out {
+			t.Errorf("buildKey(%v) = %s, want %s", tc.in, out, tc.out)
+		}
+	}
+}
