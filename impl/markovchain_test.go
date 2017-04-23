@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"fmt"
 	"io"
 	"reflect"
 	"strings"
@@ -16,21 +17,24 @@ func TestNew(t *testing.T) {
 		{
 			in: 2,
 			out: &MarkovChain{
-				Order: 2,
+				Order:     2,
+				Knowledge: map[string]frequencyGroup{},
 			},
 			ok: true,
 		},
 		{
 			in: 47,
 			out: &MarkovChain{
-				Order: 47,
+				Order:     47,
+				Knowledge: map[string]frequencyGroup{},
 			},
 			ok: true,
 		},
 		{
 			in: 1,
 			out: &MarkovChain{
-				Order: 1,
+				Order:     1,
+				Knowledge: map[string]frequencyGroup{},
 			},
 			ok: true,
 		},
@@ -72,7 +76,8 @@ func TestTrain_New(t *testing.T) {
 				order: 2,
 			},
 			out: &MarkovChain{
-				Order: 2,
+				Order:     2,
+				Knowledge: map[string]frequencyGroup{},
 			},
 			ok: true,
 		},
@@ -83,7 +88,8 @@ func TestTrain_New(t *testing.T) {
 				order: 1,
 			},
 			out: &MarkovChain{
-				Order: 1,
+				Order:     1,
+				Knowledge: map[string]frequencyGroup{},
 				Lessons: []lesson{
 					lesson{
 						Back: []string{""},
@@ -132,7 +138,8 @@ func TestTrain_New(t *testing.T) {
 				order: 2,
 			},
 			out: &MarkovChain{
-				Order: 2,
+				Order:     2,
+				Knowledge: map[string]frequencyGroup{},
 				Lessons: []lesson{
 					lesson{
 						Back: []string{"", ""},
@@ -177,7 +184,8 @@ func TestTrain_New(t *testing.T) {
 				order: 3,
 			},
 			out: &MarkovChain{
-				Order: 3,
+				Order:     3,
+				Knowledge: map[string]frequencyGroup{},
 				Lessons: []lesson{
 					{
 						Back: []string{"", "", ""},
@@ -217,7 +225,8 @@ func TestTrain_New(t *testing.T) {
 				order: 1,
 			},
 			out: &MarkovChain{
-				Order: 1,
+				Order:     1,
+				Knowledge: map[string]frequencyGroup{},
 				Lessons: []lesson{
 					{
 						Back: []string{""},
@@ -292,12 +301,14 @@ func TestTrain_Existing(t *testing.T) {
 			in: input{
 				r: "The dog",
 				m: &MarkovChain{
-					Order:   2,
-					Lessons: []lesson{},
+					Order:     2,
+					Knowledge: map[string]frequencyGroup{},
+					Lessons:   []lesson{},
 				},
 			},
 			out: &MarkovChain{
-				Order: 2,
+				Order:     2,
+				Knowledge: map[string]frequencyGroup{},
 				Lessons: []lesson{
 					lesson{
 						Back: []string{"", ""},
@@ -314,7 +325,8 @@ func TestTrain_Existing(t *testing.T) {
 		{
 			in: input{
 				m: &MarkovChain{
-					Order: 2,
+					Order:     2,
+					Knowledge: map[string]frequencyGroup{},
 					Lessons: []lesson{
 						lesson{
 							Back: []string{"red", "orange"},
@@ -324,7 +336,8 @@ func TestTrain_Existing(t *testing.T) {
 				},
 			},
 			out: &MarkovChain{
-				Order: 2,
+				Order:     2,
+				Knowledge: map[string]frequencyGroup{},
 				Lessons: []lesson{
 					lesson{
 						Back: []string{"red", "orange"},
@@ -337,7 +350,8 @@ func TestTrain_Existing(t *testing.T) {
 		{
 			in: input{
 				m: &MarkovChain{
-					Order: 1,
+					Order:     1,
+					Knowledge: map[string]frequencyGroup{},
 					Lessons: []lesson{
 						lesson{
 							Back: []string{"green"},
@@ -356,7 +370,8 @@ func TestTrain_Existing(t *testing.T) {
 				r: "translucent clear iridescent",
 			},
 			out: &MarkovChain{
-				Order: 1,
+				Order:     1,
+				Knowledge: map[string]frequencyGroup{},
 				Lessons: []lesson{
 					lesson{
 						Back: []string{"green"},
@@ -390,7 +405,8 @@ func TestTrain_Existing(t *testing.T) {
 	for _, tc := range tests {
 		// Copy.
 		m := &MarkovChain{
-			Order: tc.in.m.Order,
+			Order:     tc.in.m.Order,
+			Knowledge: map[string]frequencyGroup{},
 		}
 		// Copy demands the lengths sync up.
 		m.Lessons = make([]lesson, len(tc.in.m.Lessons))
@@ -409,7 +425,8 @@ func TestTrain_Existing(t *testing.T) {
 
 	// Test case with nil reader. Cannot be captured in above test loop.
 	m := &MarkovChain{
-		Order: 2,
+		Order:     2,
+		Knowledge: map[string]frequencyGroup{},
 		Lessons: []lesson{
 			lesson{
 				Back: []string{"one", "two"},
@@ -418,7 +435,8 @@ func TestTrain_Existing(t *testing.T) {
 		},
 	}
 	m2 := &MarkovChain{
-		Order: m.Order,
+		Order:     m.Order,
+		Knowledge: map[string]frequencyGroup{},
 	}
 	// Copy demands the lengths sync up.
 	m2.Lessons = make([]lesson, len(m.Lessons))
@@ -487,6 +505,123 @@ func TestBuildKey(t *testing.T) {
 		out := buildKey(tc.in)
 		if out != tc.out {
 			t.Errorf("buildKey(%v) = %s, want %s", tc.in, out, tc.out)
+		}
+	}
+}
+
+func testAddKnowledge(t *testing.T) {
+	type input struct {
+		m    *MarkovChain
+		back []string
+		next string
+	}
+	tests := []struct {
+		in  input
+		out *MarkovChain
+	}{
+		{
+			in: input{
+				m: &MarkovChain{
+					Order:     2,
+					Knowledge: map[string]frequencyGroup{},
+				},
+				back: []string{"alabama", "alaska"},
+				next: "arizona",
+			},
+			out: &MarkovChain{
+				Order: 2,
+				Knowledge: map[string]frequencyGroup{
+					"alabama$alaska": frequencyGroup{
+						"arizona": 1,
+					},
+				},
+			},
+		},
+		{
+			in: input{
+				m: &MarkovChain{
+					Order: 2,
+					Knowledge: map[string]frequencyGroup{
+						"arkansas$california": frequencyGroup{
+							"colorado": 2,
+						},
+					},
+				},
+				back: []string{"connecticut", "delaware"},
+				next: "florida",
+			},
+			out: &MarkovChain{
+				Order: 2,
+				Knowledge: map[string]frequencyGroup{
+					"arkansas$california": frequencyGroup{
+						"colorado": 2,
+					},
+					"connecticut$delaware": frequencyGroup{
+						"florida": 1,
+					},
+				},
+			},
+		},
+		{
+			in: input{
+				m: &MarkovChain{
+					Order: 2,
+					Knowledge: map[string]frequencyGroup{
+						"georgia$hawaii": frequencyGroup{
+							"idaho":    4,
+							"illinois": 6,
+						},
+					},
+				},
+				back: []string{"georgia", "hawaii"},
+				next: "indiana",
+			},
+			out: &MarkovChain{
+				Order: 2,
+				Knowledge: map[string]frequencyGroup{
+					"georgia$hawaii": frequencyGroup{
+						"idaho":    4,
+						"illinois": 6,
+						"indiana":  1,
+					},
+				},
+			},
+		},
+		{
+			in: input{
+				m: &MarkovChain{
+					Order: 2,
+					Knowledge: map[string]frequencyGroup{
+						"iowa$kansas": frequencyGroup{
+							"kentucky":  3,
+							"louisiana": 1,
+							"maine":     2,
+						},
+					},
+				},
+				back: []string{"iowa", "kansas"},
+				next: "louisiana",
+			},
+			out: &MarkovChain{
+				Order: 2,
+				Knowledge: map[string]frequencyGroup{
+					"iowa$kansas": frequencyGroup{
+						"kentucky":  3,
+						"louisiana": 2,
+						"maine":     2,
+					},
+				},
+			},
+		},
+	}
+	for _, tc := range tests {
+		in := tc.in
+		// Save state for possibly printing later.
+		mBeforeStr := fmt.Sprintf("%+v", in.m)
+
+		in.m.addKnowledge(in.back, in.next)
+		if !reflect.DeepEqual(in.m, tc.out) {
+			t.Errorf("(%s).addKnowledge(%v, %s) yielded %+v, want %+v", mBeforeStr, in.back, in.next, in.m, tc.out)
 		}
 	}
 }

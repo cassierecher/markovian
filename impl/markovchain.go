@@ -10,11 +10,18 @@ import (
 	"unicode"
 )
 
+type frequencyGroup map[string]int
+
+func newFrequencyGroup() map[string]int {
+	return make(map[string]int)
+}
+
 // MarkovChain encapsulates a Markov chain.
 // Never create a MarkovChain directly - always use the provided New function.
 type MarkovChain struct {
-	Lessons []lesson
-	Order   int
+	Lessons   []lesson
+	Order     int
+	Knowledge map[string]frequencyGroup
 }
 
 // lesson internally represents a single iteration of training - a set of words, and the word to follow.
@@ -30,7 +37,8 @@ func New(order int) (*MarkovChain, error) {
 		return nil, fmt.Errorf("order must be positive (got %d)", order)
 	}
 	m := MarkovChain{
-		Order: order,
+		Knowledge: make(map[string]frequencyGroup),
+		Order:     order,
 	}
 	return &m, nil
 }
@@ -95,4 +103,14 @@ func buildKey(in []string) string {
 		in[i] = strings.Replace(in[i], `$`, `\$`, -1)
 	}
 	return strings.Join(in, "$")
+}
+
+func (m *MarkovChain) addKnowledge(back []string, next string) {
+	k := buildKey(back)
+	fg, ok := m.Knowledge[k]
+	if !ok {
+		fg = newFrequencyGroup()
+		m.Knowledge[k] = fg
+	}
+	fg[next]++
 }
